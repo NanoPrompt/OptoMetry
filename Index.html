@@ -1,0 +1,100 @@
+
+<html>
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.3/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f2f2f2;
+            color: #333;
+        }
+        h1 {
+            color: #555;
+        }
+        .output-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .spectacles-symbol { 
+            font-size: 1.25rem; /* Match with button text size */
+            color: #ff4500;  /* Use a vibrant orange color */
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between items-center p-4">
+    <div class="w-full max-w-lg">
+        <h1 class="text-2xl font-bold text-center mb-6">Optometry Solutions Finder</h1>
+        <form id="optometryForm" class="bg-white p-6 rounded-lg shadow-md space-y-4">
+            <div class="flex flex-col">
+                <label for="concern" class="text-lg mb-2">Eye Concern or Problems</label>
+                <input type="text" id="concern" class="p-2 border border-gray-300 rounded" required>
+            </div>
+            <div class="flex flex-col">
+                <label for="productType" class="text-lg mb-2">Type of Optometry Product or Information Needed</label>
+                <input type="text" id="productType" class="p-2 border border-gray-300 rounded" required>
+            </div>
+            <div class="flex flex-col">
+                <label for="brands" class="text-lg mb-2">Preferred Brands or Specific Products of Interest</label>
+                <input type="text" id="brands" class="p-2 border border-gray-300 rounded" required>
+            </div>
+            <div class="flex flex-col">
+                <label for="paymentMethods" class="text-lg mb-2">Payment Methods</label>
+                <input type="text" id="paymentMethods" class="p-2 border border-gray-300 rounded" required>
+            </div>
+            <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded shadow-lg transition duration-300 hover:bg-blue-600">
+                Dive into Details! <span class="spectacles-symbol">&#x1F453;</span> <!-- Spectacles Symbol with new styling -->
+            </button>
+        </form>
+
+        <div id="output" class="output-section mt-6"></div>
+    </div>
+    
+    <footer class="mt-6">
+        <a href="https://sites.google.com/d/1Gta7pekUannxJQXC1XkafZjG63xYRNMo/p/1R15n3eOIgza9QjXiVDfJ4bQa_3f08OjB/edit" class="text-blue-500 hover:underline">Made with ❤️</a>
+    </footer>
+
+    <script>
+        document.getElementById('optometryForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const concern = document.getElementById('concern').value;
+            const productType = document.getElementById('productType').value;
+            const brands = document.getElementById('brands').value;
+            const paymentMethods = document.getElementById('paymentMethods').value;
+
+            const substitutedPrompt = `Generate information on optometry products for individuals experiencing ${concern}. They are looking for ${productType} and are interested in ${brands}. They prefer to use ${paymentMethods} for purchases.`;
+
+            const output = document.getElementById('output');
+            output.innerText = ''; // Clear previous output
+
+            const ws = new WebSocket('wss://backend.buildpicoapps.com/ask_ai_streaming_v2');
+
+            ws.addEventListener('open', () => {
+                ws.send(JSON.stringify({
+                    appId: 'too-food',
+                    prompt: substitutedPrompt,
+                }));
+            });
+
+            ws.addEventListener('message', (event) => {
+                console.log(event.data);
+                output.innerText = `${output.innerText}${event.data}`;
+            });
+
+            ws.addEventListener('close', (event) => {
+                console.log('Connection closed', event.code, event.reason);
+                if (event.code != 1000) {
+                    alert('Oops, we ran into an error. Refresh the page and try again.');
+                }
+            });
+
+            ws.addEventListener('error', (error) => {
+                console.log('WebSocket error', error);
+                alert('Oops, we ran into an error. Refresh the page and try again.');
+            });
+        });
+    </script>
+</body>
+</html>
